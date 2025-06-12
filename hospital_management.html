@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hospital Management Software</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e9f5ff;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 10px;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Section -->
+<div class="container" id="login-section">
+  <h2>Admin Login</h2>
+  <input type="text" id="admin-user" placeholder="Username">
+  <input type="password" id="admin-pass" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p id="login-error" style="color:red;"></p>
+</div>
+
+<!-- Dashboard -->
+<div class="container hidden" id="dashboard">
+  <h2>Hospital Management Dashboard</h2>
+
+  <h3>Add New Patient</h3>
+  <input type="text" id="patient-name" placeholder="Patient Name">
+  <input type="text" id="patient-id" placeholder="Patient ID">
+  <input type="number" id="patient-age" placeholder="Age">
+  <select id="patient-gender">
+    <option value="">Select Gender</option>
+    <option>Male</option>
+    <option>Female</option>
+    <option>Other</option>
+  </select>
+  <textarea id="patient-diagnosis" placeholder="Diagnosis/Notes" rows="3"></textarea>
+  <button onclick="addPatient()">Add Patient</button>
+
+  <h3>Patient List</h3>
+  <table id="patient-table">
+    <thead>
+      <tr>
+        <th>Name</th><th>ID</th><th>Age</th><th>Gender</th><th>Diagnosis</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button onclick="logout()" style="background: red;">Logout</button>
+</div>
+
+<script>
+  let patients = JSON.parse(localStorage.getItem("patients")) || [];
+
+  function login() {
+    const user = document.getElementById("admin-user").value;
+    const pass = document.getElementById("admin-pass").value;
+
+    if (user === "admin" && pass === "12345") {
+      document.getElementById("login-section").classList.add("hidden");
+      document.getElementById("dashboard").classList.remove("hidden");
+      renderPatientTable();
+    } else {
+      document.getElementById("login-error").textContent = "Invalid credentials!";
+    }
+  }
+
+  function logout() {
+    document.getElementById("dashboard").classList.add("hidden");
+    document.getElementById("login-section").classList.remove("hidden");
+    document.getElementById("admin-user").value = '';
+    document.getElementById("admin-pass").value = '';
+    document.getElementById("login-error").textContent = '';
+  }
+
+  function addPatient() {
+    const name = document.getElementById("patient-name").value;
+    const id = document.getElementById("patient-id").value;
+    const age = document.getElementById("patient-age").value;
+    const gender = document.getElementById("patient-gender").value;
+    const diagnosis = document.getElementById("patient-diagnosis").value;
+
+    if (name && id && age && gender && diagnosis) {
+      patients.push({ name, id, age, gender, diagnosis });
+      localStorage.setItem("patients", JSON.stringify(patients));
+      renderPatientTable();
+      document.getElementById("patient-name").value = '';
+      document.getElementById("patient-id").value = '';
+      document.getElementById("patient-age").value = '';
+      document.getElementById("patient-gender").value = '';
+      document.getElementById("patient-diagnosis").value = '';
+    } else {
+      alert("Please fill in all fields.");
+    }
+  }
+
+  function renderPatientTable() {
+    const tbody = document.querySelector("#patient-table tbody");
+    tbody.innerHTML = "";
+
+    patients.forEach((p, index) => {
+      const row = `<tr>
+        <td>${p.name}</td>
+        <td>${p.id}</td>
+        <td>${p.age}</td>
+        <td>${p.gender}</td>
+        <td>${p.diagnosis}</td>
+        <td><button onclick="deletePatient(${index})" style="background:red;">Delete</button></td>
+      </tr>`;
+      tbody.innerHTML += row;
+    });
+  }
+
+  function deletePatient(index) {
+    if (confirm("Delete this patient record?")) {
+      patients.splice(index, 1);
+      localStorage.setItem("patients", JSON.stringify(patients));
+      renderPatientTable();
+    }
+  }
+</script>
+
+</body>
+</html>
